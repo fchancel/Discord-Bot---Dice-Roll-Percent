@@ -11,14 +11,14 @@ client = discord.Client()
 def parse_rolled_percent_dice(cmd):
     cmd = cmd.split()[1:]
     try:
-        int(cmd[0][1:])
+        int(cmd[0][2:])
     except ValueError:
         raise Exception("Idiot ! Ta commande est invalide !")
     if cmd[1] != "d" or "p" not in cmd:
         raise Exception("Idiot ! Ta commande est invalide !")
     i = 2
     number_list = []
-    dice_value = int(cmd[0][1:])
+    dice_value = int(cmd[0][2:])
     while cmd[i] != "p":
         try:
             int(cmd[i])
@@ -54,11 +54,14 @@ def parse_rolled_percent_dice(cmd):
             "Idiot ! Ta liste de dé ne doit pas comporter de doublon")
     elif total_percent > 100:
         raise Exception("Idiot ! Tu ne peux pas dépasser 100% !")
+    elif len(number_list) == dice_value and total_percent != 100:
+        raise Exception(
+            "Idiot ! Le total doit atteindre 100% si tu souhaites selectionner des valeurs pour chaque face de ton dé ! ")
 
 
 def rolled_percent_dice(cmd):
     cmd = cmd.split()[1:]
-    dice_faces = int(cmd[0][1:])
+    dice_faces = int(cmd[0][2:])
     if dice_faces == 1:
         return 1
     else:
@@ -78,28 +81,63 @@ def rolled_percent_dice(cmd):
             while j != int(percent_list[i]):
                 numbers_final_lst.append(numbers_lst[i])
                 j += 1
-        for value in range(1, dice_faces + 1):
-            if value not in numbers_lst:
-                value_lst.append(value)
-        for i in range(len(numbers_final_lst), 100):
-            numbers_final_lst.append(value_lst[i % len(value_lst)])
+        if len(numbers_lst) != dice_faces:
+            for value in range(1, dice_faces + 1):
+                if value not in numbers_lst:
+                    value_lst.append(value)
+            for i in range(len(numbers_final_lst), 100):
+                numbers_final_lst.append(value_lst[i % len(value_lst)])
         random.shuffle(numbers_final_lst)
         return numbers_final_lst[value_select]
 
 
-def make_response(cmd, message, result):
+def parse_rolled_dice(cmd):
     cmd = cmd.split()[1:]
-    dice_faces = int(cmd[0][1:])
-    numbers_lst = []
-    i = 2
-    while cmd[i] != "p":
-        numbers_lst.append(cmd[i])
-        i += 1
-    percent_lst = cmd[i + 1:]
+    if len(cmd) != 1 or 'd' not in cmd[0]:
+        raise Exception("Idiot ! Ta commande est invalide !")
+    cmd = cmd[0].split('d')
+    try:
+        nb_dice = int(cmd[0])
+        dice_value = int(cmd[1])
+    except ValueError:
+        raise Exception("Idiot ! Ta commande est invalide !")
 
-    msg = f"Le résultat de 1d{dice_faces} est: **{result}\n** *Pourcentage demandé :*\n"
-    for i in range(len(numbers_lst)):
-        msg = f"{msg} *{str(numbers_lst[i])} - {percent_lst[i]}%* \n"
+
+def rolled_dice(cmd):
+    cmd = cmd.split('d')
+    nb_dice = int(cmd[0])
+    dice_value = int(cmd[1])
+    result_lst = []
+    for i in range(nb_dice):
+        result_lst.append(random.randint(1, dice_value))
+    return result_lst
+
+
+def make_response(cmd, message, result, percent=False):
+    cmd = cmd.split()[1:]
+    if percent:
+        dice_faces = int(cmd[0][2:])
+        numbers_lst = []
+        i = 2
+        while cmd[i] != "p":
+            numbers_lst.append(cmd[i])
+            i += 1
+        percent_lst = cmd[i + 1:]
+
+        msg = f"Le résultat de 1d{dice_faces} est: **{result}\n** *Pourcentage demandé :*\n"
+        for i in range(len(numbers_lst)):
+            msg = f"{msg} *{str(numbers_lst[i])} - {percent_lst[i]}%* \n"
+    else:
+        msg = f"Le résultat de {cmd[0]} est "
+        dice_faces = int(cmd[0].split("d")[1])
+        if len(result) > 1:
+            msg += " [ "
+        for i in range(len(result)):
+            msg += str(result[i])
+            if i < len(result) - 1:
+                msg += " + "
+        if len(result) > 1:
+            msg += f" ] = {sum(result)}"
 
     embedVar = discord.Embed(
         title="Lanceur de dé", description=msg, color=3447003)
@@ -126,7 +164,7 @@ async def on_message(message):
     if len(message.content) > 0:
         cmd_lst = message.content.split()
         if cmd_lst[0] == '!dice':
-            if cmd_lst[1][0] == "p":
+            if cmd_lst[1][0:2] == "dp":
                 try:
                     parse_rolled_percent_dice(message.content)
                     result = rolled_percent_dice(message.content)
@@ -134,16 +172,19 @@ async def on_message(message):
                     for msg in message_delete:
                         await msg.delete()
 
-                    await message.channel.send(embed=make_response(message.content, message, result))
+                    await message.channel.send(embed=make_response(message.content, message, result, True))
                 except Exception as e:
                     await message.channel.send(embed=make_error_response(message, e))
             else:
                 try:
-                    nb_dice = int(cmd_lst[1][0])
-                    if nb_dice > 0:
-                        pass
-                    else:
-                        await message.channel.send(embed=make_error_response(message, "Idiot ! Choisis au minimum un dé !"))
+                    parse_rolled_dice(message.content)
+                    result = rolled_dice(cmd_lst[1])
+                    message_delete = await message.channel.history(limit=1).flatten()
+                    for msg in message_delete:
+                        await msg.delete()
+                    
+                    await message.channel.send(embed=make_response(message.content, message, result, False))
+
                 except ValueError:
                     await message.channel.send(embed=make_error_response(message, "Idiot ! Ta commande est invalide"))
 
