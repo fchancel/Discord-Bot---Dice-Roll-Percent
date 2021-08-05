@@ -36,5 +36,14 @@ Command to launch on Discord to activate the bot:
 `!dice` allows to call the bot.
 
 `3` the number of dice
+
 `d` for dice
+
 `6` the number of surfaces of the die
+
+## DEMO
+![](https://gitlab.com/fchancel/python-discord-bot/-/raw/main/image/example1.png)
+
+![](https://gitlab.com/fchancel/python-discord-bot/-/raw/main/image/example2.png)
+
+![](https://gitlab.com/fchancel/python-discord-bot/-/raw/main/image/example3.png)
