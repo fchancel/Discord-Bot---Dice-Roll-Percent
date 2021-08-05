@@ -116,6 +116,7 @@ def rolled_dice(cmd):
 def make_response(cmd, message, result, percent=False):
     cmd = cmd.split()[1:]
     if percent:
+        nb_dice = 1
         dice_faces = int(cmd[0][2:])
         numbers_lst = []
         i = 2
@@ -130,6 +131,7 @@ def make_response(cmd, message, result, percent=False):
     else:
         msg = f"Le résultat de {cmd[0]} est "
         dice_faces = int(cmd[0].split("d")[1])
+        nb_dice = int(cmd[0].split("d")[0])
         if len(result) > 1:
             msg += " [ "
         for i in range(len(result)):
@@ -142,7 +144,7 @@ def make_response(cmd, message, result, percent=False):
     embedVar = discord.Embed(
         title="Lanceur de dé", description=msg, color=3447003)
     embedVar.set_footer(icon_url=message.author.default_avatar_url,
-                        text=f"{message.author.display_name}  vient de lancer 1 dé de {dice_faces} faces")
+                        text=f"{message.author.display_name}  vient de lancer {nb_dice} dé de {dice_faces} faces")
     return embedVar
 
 
