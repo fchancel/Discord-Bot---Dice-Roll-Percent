@@ -166,7 +166,7 @@ async def on_message(message):
     if len(message.content) > 0:
         cmd_lst = message.content.split()
         if cmd_lst[0] == '!dice':
-            if cmd_lst[1][0:2] == "dp":
+            if len(cmd_lst) > 1 and cmd_lst[1][0:2] == "dp":
                 try:
                     parse_rolled_percent_dice(message.content)
                     result = rolled_percent_dice(message.content)
@@ -187,7 +187,7 @@ async def on_message(message):
                     
                     await message.channel.send(embed=make_response(message.content, message, result, False))
 
-                except ValueError:
+                except Exception:
                     await message.channel.send(embed=make_error_response(message, "Idiot ! Ta commande est invalide"))
 
 
