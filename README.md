@@ -42,8 +42,8 @@ Command to launch on Discord to activate the bot:
 `6` the number of surfaces of the die
 
 ## DEMO
-![](https://gitlab.com/fchancel/python-discord-bot/-/raw/main/image/example1.png)
+![](https://raw.githubusercontent.com/fchancel/Discord-Bot-Dice-Roll-Percent/main/image/example1.png)
 
-![](https://gitlab.com/fchancel/python-discord-bot/-/raw/main/image/example2.png)
+![](https://raw.githubusercontent.com/fchancel/Discord-Bot-Dice-Roll-Percent/main/image/example2.png)
 
-![](https://gitlab.com/fchancel/python-discord-bot/-/raw/main/image/example3.png)
+![](https://raw.githubusercontent.com/fchancel/Discord-Bot-Dice-Roll-Percent/main/image/example3.png)
